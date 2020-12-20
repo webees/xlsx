@@ -8,6 +8,7 @@ interface opt {
 }
 
 export default class XLSX {
+  static fileName: string // 当前文件名
   static commissionNumber: string // 委托编号
   static commissionData: string // 委托日期
   static deviceNumber: string // 仪器编号
@@ -51,19 +52,20 @@ export default class XLSX {
     for (let i = 0; i < files.length; i++) {
       if (files[i] === opt.conf) continue
       if (this.counter === 12) this.upFixValue(), this.counter = 0
-      this.counter ++
+      this.counter++
       this.currentPage = i
-      this.testDate = JSON.parse(JSON.stringify(xlsx.getRow(sRow + i).values))[10]
-      this.pourDate = JSON.parse(JSON.stringify(xlsx.getRow(sRow + i).values))[4]
-      this.pourfloor = JSON.parse(JSON.stringify(xlsx.getRow(sRow + i).values))[3]
-      this.pourName = JSON.parse(JSON.stringify(xlsx.getRow(sRow + i).values))[2]
-      this.powerLevel = JSON.parse(JSON.stringify(xlsx.getRow(sRow + i).values))[11]
-      this.levelAge = JSON.parse(JSON.stringify(xlsx.getRow(sRow + i).values))[12]
-      this.mpa1 = parseFloat(JSON.parse(JSON.stringify(xlsx.getRow(sRow + i).values))[5]).toFixed(1)
-      this.mpa2 = parseFloat(JSON.parse(JSON.stringify(xlsx.getRow(sRow + i).values))[6]).toFixed(1)
-      this.mpa3 = parseFloat(JSON.parse(JSON.stringify(xlsx.getRow(sRow + i).values))[7]).toFixed(2)
-      this.mpa4 = parseFloat(JSON.parse(JSON.stringify(xlsx.getRow(sRow + i).values))[8]).toFixed(1)
-      this.mpa5 = parseFloat(JSON.parse(JSON.stringify(xlsx.getRow(sRow + i).values))[9]).toFixed(1)
+      this.fileName = files[i]
+      this.testDate = xlsx.getRow(sRow + i).values[10]
+      this.pourDate = xlsx.getRow(sRow + i).values[4]
+      this.pourfloor = xlsx.getRow(sRow + i).values[3]
+      this.pourName = xlsx.getRow(sRow + i).values[2]
+      this.powerLevel = xlsx.getRow(sRow + i).values[11]
+      this.levelAge = xlsx.getRow(sRow + i).values[12]
+      this.mpa1 = parseFloat(xlsx.getRow(sRow + i).values[5]).toFixed(1)
+      this.mpa2 = parseFloat(xlsx.getRow(sRow + i).values[6]).toFixed(1)
+      this.mpa3 = parseFloat(xlsx.getRow(sRow + i).values[7]).toFixed(2)
+      this.mpa4 = parseFloat(xlsx.getRow(sRow + i).values[8]).toFixed(1)
+      this.mpa5 = parseFloat(xlsx.getRow(sRow + i).values[9]).toFixed(1)
       console.log(`\n\n文件名:${files[i]}`)
       console.log('检测日期:', this.testDate)
       console.log('浇筑日期:', this.pourDate)
@@ -134,6 +136,10 @@ export default class XLSX {
     let area = JSON.parse(JSON.stringify(sheet.getRow(index).values)).slice(4, 25)
     let ri1 = area.slice(0, 8) // 回弹值列一
     let ri2 = area.slice(8, 16) // 回弹值列二
+    for (let i = 0; i < ri1.length; i++) {
+      if (typeof ri1[i] === 'string' && !/^\d{2}$/.test(ri1[i])) throw `\n文件:${this.fileName}\n页码:${this.currentPage}\n第${index}行存在错误！\n`
+      if (typeof ri2[i] === 'string' && !/^\d{2}$/.test(ri1[i])) throw `\n文件:${this.fileName}\n页码:${this.currentPage}\n第${index}行存在错误！\n`
+    }
     let rm1 = area[rm1Col].toFixed(1) // 回弹均值
     let rm2 = area[rm2Col].toFixed(1) // 修正值
     let mpa = area[mpaCol].toFixed(1) // 测位推定
@@ -170,16 +176,16 @@ export default class XLSX {
   // 碳化深度、强度平均、标准差、最小值、强度推定、委托日期
   static other(sheet: Excel.Worksheet) {
     let rows = []
-    const mpa1 = parseFloat(JSON.parse(JSON.stringify(sheet.getRow(10).values))[4].replace(/\s*/g, '').substring(4)).toFixed(1)
-    if (mpa1 !== this.mpa1) throw '碳化深度与总表不一致！'
-    const mpa2 = parseFloat(JSON.parse(JSON.stringify(sheet.getRow(33).values))[12].replace(/\s*/g, '').substr(-16, 4)).toFixed(1)
-    if (mpa2 !== this.mpa2) throw '平均值与总表不一致！'
-    const mpa3 = parseFloat(JSON.parse(JSON.stringify(sheet.getRow(33).values))[12].replace(/\s*/g, '').substr(-12, 4)).toFixed(2)
-    if (mpa3 !== this.mpa3) throw '标准差与总表不一致！'
-    const mpa4 = parseFloat(JSON.parse(JSON.stringify(sheet.getRow(33).values))[12].replace(/\s*/g, '').substr(-8, 4)).toFixed(1)
-    if (mpa4 !== this.mpa4) throw '最小值与总表不一致！'
-    const mpa5 = parseFloat(JSON.parse(JSON.stringify(sheet.getRow(33).values))[12].replace(/\s*/g, '').substr(-4, 4)).toFixed(1)
-    if (mpa5 !== this.mpa5) throw '推定值与总表不一致！'
+    const mpa1 = parseFloat(sheet.getRow(10).values[4].replace(/\s*/g, '').substring(4)).toFixed(1)
+    if (mpa1 !== this.mpa1) throw `\n文件:${this.fileName}\n页码:${this.currentPage}\n碳化深度${mpa1}与总表值${this.mpa1}不一致！\n`
+    const mpa2 = parseFloat(sheet.getRow(33).values[12].replace(/\s*/g, '').substr(-16, 4)).toFixed(1)
+    if (mpa2 !== this.mpa2) throw `\n文件:${this.fileName}\n页码:${this.currentPage}\n平均值${mpa2}与总表值${this.mpa2}不一致！\n`
+    const mpa3 = parseFloat(sheet.getRow(33).values[12].replace(/\s*/g, '').substr(-12, 4)).toFixed(2)
+    if (mpa3 !== this.mpa3) throw `\n文件:${this.fileName}\n页码:${this.currentPage}\n标准差${mpa3}与总表值${this.mpa3}不一致！\n`
+    const mpa4 = parseFloat(sheet.getRow(33).values[12].replace(/\s*/g, '').substr(-8, 4)).toFixed(1)
+    if (mpa4 !== this.mpa4) throw `\n文件:${this.fileName}\n页码:${this.currentPage}\n最小值${mpa4}与总表值${this.mpa4}不一致！\n`
+    const mpa5 = parseFloat(sheet.getRow(33).values[12].replace(/\s*/g, '').substr(-4, 4)).toFixed(1)
+    if (mpa5 !== this.mpa5) throw `\n文件:${this.fileName}\n页码:${this.currentPage}\n推定值${mpa5}与总表值${this.mpa5}不一致！\n`
     rows.push(mpa1)
     rows.push(mpa2)
     rows.push(mpa3)
@@ -265,7 +271,7 @@ export default class XLSX {
     sheet.getCell('AJ1').value = '当前页'
     sheet.getCell('AK1').value = '总页数'
     sheet.getCell('AL1').value = '委托编号'
-    sheet.mergeCells('AM1:AP1'), sheet.getCell('AM1').value = '率定制'
+    sheet.mergeCells('AM1:AP1'), sheet.getCell('AM1').value = '率定值'
   }
 
   // 合并单元格
