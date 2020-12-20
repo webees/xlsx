@@ -1,0 +1,37 @@
+{
+  "name": "xlsx",
+  "version": "0.1.0",
+  "description": "xlsx",
+  "author": "webees <hi@webees.net>",
+  "main": "dist/index.js",
+  "keywords": [
+    "xlsx"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webees/xlsx.git"
+  },
+  "scripts": {
+    "npm:check": "npx npm-check -u",
+    "tsc:check": "tsc --noEmit",
+    "tsc:watch": "npm run tsc:check --watch",
+    "build": "rimraf dist && tsc",
+    "build:docs": "typedoc src --out docs --mode file",
+    "test:xlsx": "ava -v -T 60m -m xlsx*",
+    "test": "ava -v -T 60m"
+  },
+  "dependencies": {
+    "exceljs": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.14",
+    "ava": "^3.14.0",
+    "rimraf": "^3.0.2",
+    "ts-node": "^9.1.1",
+    "typedoc": "^0.19.2",
+    "typescript": "^4.1.3"
+  },
+  "files": [
+    "dist"
+  ]
+}
