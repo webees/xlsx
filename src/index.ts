@@ -134,6 +134,9 @@ export default class XLSX {
     const mpaCol = 20 // 测位推定
     const diRows = [0, 4, 7, 10] // 实测碳化深度行
     let area = JSON.parse(JSON.stringify(sheet.getRow(index).values)).slice(4, 25)
+    for (let i = 0; i < area.length;i ++) {
+      if(typeof area[i] === 'string') area[i] = parseFloat(area[i].replace(/\s*/g, '')) // 去除多余的空格
+    }
     let ri1 = area.slice(0, 8) // 回弹值列一
     let ri2 = area.slice(8, 16) // 回弹值列二
     for (let i = 0; i < ri1.length; i++) {
@@ -176,15 +179,15 @@ export default class XLSX {
   // 碳化深度、强度平均、标准差、最小值、强度推定、委托日期
   static other(sheet: Excel.Worksheet) {
     let rows = []
-    const mpa1 = parseFloat(sheet.getRow(10).values[4].replace(/\s*/g, '').substring(4)).toFixed(1)
+    const mpa1 = parseFloat(String(sheet.getRow(10).values[4]).replace(/\s*/g, '').substring(4)).toFixed(1)
     if (mpa1 !== this.mpa1) throw `\n文件:${this.fileName}\n页码:${this.currentPage}\n碳化深度${mpa1}与总表值${this.mpa1}不一致！\n`
-    const mpa2 = parseFloat(sheet.getRow(33).values[12].replace(/\s*/g, '').substr(-16, 4)).toFixed(1)
+    const mpa2 = parseFloat(String(sheet.getRow(33).values[12]).replace(/\s*/g, '').substr(-16, 4)).toFixed(1)
     if (mpa2 !== this.mpa2) throw `\n文件:${this.fileName}\n页码:${this.currentPage}\n平均值${mpa2}与总表值${this.mpa2}不一致！\n`
-    const mpa3 = parseFloat(sheet.getRow(33).values[12].replace(/\s*/g, '').substr(-12, 4)).toFixed(2)
+    const mpa3 = parseFloat(String(sheet.getRow(33).values[12]).replace(/\s*/g, '').substr(-12, 4)).toFixed(2)
     if (mpa3 !== this.mpa3) throw `\n文件:${this.fileName}\n页码:${this.currentPage}\n标准差${mpa3}与总表值${this.mpa3}不一致！\n`
-    const mpa4 = parseFloat(sheet.getRow(33).values[12].replace(/\s*/g, '').substr(-8, 4)).toFixed(1)
+    const mpa4 = parseFloat(String(sheet.getRow(33).values[12]).replace(/\s*/g, '').substr(-8, 4)).toFixed(1)
     if (mpa4 !== this.mpa4) throw `\n文件:${this.fileName}\n页码:${this.currentPage}\n最小值${mpa4}与总表值${this.mpa4}不一致！\n`
-    const mpa5 = parseFloat(sheet.getRow(33).values[12].replace(/\s*/g, '').substr(-4, 4)).toFixed(1)
+    const mpa5 = parseFloat(String(sheet.getRow(33).values[12]).replace(/\s*/g, '').substr(-4, 4)).toFixed(1)
     if (mpa5 !== this.mpa5) throw `\n文件:${this.fileName}\n页码:${this.currentPage}\n推定值${mpa5}与总表值${this.mpa5}不一致！\n`
     rows.push(mpa1)
     rows.push(mpa2)
